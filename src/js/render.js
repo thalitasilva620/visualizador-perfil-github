@@ -1,70 +1,46 @@
-/**
- * Renderiza o card do perfil do usuário
- * @param {Object} userData - Dados do usuário do GitHub
- * @returns {string} HTML do perfil
- */
-function renderProfileCard(userData) {
-  return `
+export function renderProfile(userData, userRepos, container) {
+
+  const repositoriesHtml = userRepos && userRepos.length > 0 ? userRepos.map(repo => `
+  <a href="${repo.html_url}" target="_blank">
+    <div class="repository-card"
+      <h3>${repo.name}</h3>
+      <div class="repository-stats">
+        <span>⭐ Stars: ${repo.stargazers_count}</span>
+        <span>🍴 Forks: ${repo.forks_count}</span>
+        <span>👀 Watchers${repo.watchers_count}</span>
+        <span>💻 Language${repo.language_count || 'Não informada'}</span>
+      </div>
+    </div>
+  </a>
+  `).join('') : '<p>Nenhum repositório encontrado.</p>';
+
+  container.innerHTML = `
     <div class="profile-card">
-      <img src="${userData.avatar_url}" alt="Avatar de ${userData.name}" class="profile-avatar">
-      <div>
+      <img src="${userData.avatar_url}" alt="Avatar de ${
+    userData.name
+  }" class="profile-avatar">
+      <div class="profile-info">
         <h2>${userData.name}</h2>
-        <p>${userData.bio || 'Não possui bio cadastrada 🤔.'}</p>
+        <p>${userData.bio || "Não possui bio cadastrada 😢."}</p>
       </div>
     </div>
-  `;
-}
 
-/**
- * Renderiza os contadores de seguidores e seguindo
- * @param {Object} userData - Dados do usuário do GitHub
- * @returns {string} HTML dos contadores
- */
-function renderCounters(userData) {
-  return `
     <div class="profile-counters">
-      <div class="followers">
-        <h4>👥 Seguidores</h4>
-        <span>${userData.followers}</span>
-      </div>
-      <div class="following">
-        <h4>👥 Seguindo</h4>
-        <span>${userData.following}</span>
+        <div class="followers">
+            <h4>👥 Seguidores</h4>
+            <span>${userData.followers}</span>
+        </div>
+        <div class="following">
+            <h4>👥 Seguindo</h4>
+            <span>${userData.following}</span>
+        </div>
+    </div>
+
+    <div class="profile-repositories">
+      <h2>Repositórios</h2>
+      <div class="repositories">
+        ${repositoriesHtml}
       </div>
     </div>
   `;
-}
-
-/**
- * Renderiza o estado de carregamento
- * @returns {string} HTML de carregamento
- */
-export function renderLoading() {
-  return `<p class="loading">Carregando...</p>`;
-}
-
-/**
- * Renderiza os resultados do perfil
- * @param {Object} userData - Dados do usuário do GitHub
- * @returns {string} HTML completo do perfil
- */
-export function renderProfileResults(userData) {
-  return renderProfileCard(userData) + renderCounters(userData);
-}
-
-/**
- * Limpa os resultados do perfil
- * @param {HTMLElement} profileResults - Elemento onde os resultados são exibidos
- */
-export function clearProfileResults(profileResults) {
-  profileResults.innerHTML = '';
-}
-
-/**
- * Atualiza o conteúdo dos resultados
- * @param {HTMLElement} profileResults - Elemento onde os resultados são exibidos
- * @param {string} content - Conteúdo HTML a ser inserido
- */
-export function updateProfileResults(profileResults, content) {
-  profileResults.innerHTML = content;
 }
