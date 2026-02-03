@@ -1,42 +1,66 @@
+import { fetchGithubUser } from './api.js';
+import { 
+  renderLoading, 
+  renderProfileResults, 
+  clearProfileResults, 
+  updateProfileResults 
+} from './render.js';
+
+// Elementos do DOM
 const inputSearch = document.getElementById('input-search');
 const btnSearch = document.getElementById('btn-search');
-const profileResults = document.querySelector('.profile-results')
+const profileResults = document.querySelector('.profile-results');
 
-const BASE_URL = 'https://api.github.com';
+/**
+ * Valida se o nome de usuário foi fornecido
+ * @param {string} userName - Nome do usuário
+ * @returns {boolean} Verdadeiro se válido
+ */
+function validateUserName(userName) {
+  if (!userName) {
+    alert('Por favor, digite um nome de usuário do GitHub.');
+    return false;
+  }
+  return true;
+}
 
-btnSearch.addEventListener(`click`, async () => {
-    const userName = inputSearch.value;
+/**
+ * Executa a busca de um usuário do GitHub
+ */
+async function handleSearch() {
+  const userName = inputSearch.value.trim();
 
-    if (userName) {
-        profileResults.innerHTML = `<p class="loading">Carregando...</p>`;
+  if (!validateUserName(userName)) {
+    return;
+  }
 
-        try {
-            const response = await fetch(`${BASE_URL}/users/${userName}`);
+  try {
+    updateProfileResults(profileResults, renderLoading());
 
-            if (!response.ok) {
-                alert(`Usuário não encontrado. Por favor, verifique o nome de usuário e tente novamente.`);
-                profileResults.innerHTML = "";
-                return;
-            }
+    const userData = await fetchGithubUser(userName);
+    updateProfileResults(profileResults, renderProfileResults(userData));
 
-            const userData = await response.json();
+  } catch (error) {
+    console.error("Erro ao buscar o perfil do usuário:", error);
+    alert(error.message || "Ocorreu um erro ao buscar o perfil do usuário. Por favor, tente novamente mais tarde.");
+    clearProfileResults(profileResults);
+  }
+}
 
-            profileResults.innerHTML = `
-            <div class="profile-card">
-                <img src="${userData.avatar_url}" alt="Avatar de ${userData.name}" class="profile-avatar">
-                <div>
-                    <h2>${userData.name}</h2>
-                    <p>${userData.bio || 'Não possui bio cadastrada 🤔.'}</p>
-                </div>
-            </div>`;
 
-        } catch (error) {
-            console.error("Erro ao buscar o perfil do usuário:", error);
-            alert("Ocorreu um erro ao buscar o perfil do usuário. Por favor, tente novamente mais tarde.");
-            profileResults.innerHTML = "";
-        }
-    }else {
-        alert('Por favor, digite um nome de usuário do GitHub.');
+function initEventListener() {
+  btnSearch.addEventListener('click', handleSearch);
+
+  // opcional: permitir buscar apertando Enter
+  inputSearch.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      handleSearch();
     }
-});
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initEventListener);
+
+
+
 
